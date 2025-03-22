@@ -52,7 +52,7 @@
 <script lang="ts" setup>
 import {computed, onMounted, ref} from "vue";
 import {ipcRenderer} from 'electron'
-import { Howl } from 'howler'
+//import { Howl } from 'howler'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import {
@@ -173,7 +173,7 @@ onMounted(async () => {
 }
 
 .font-digital-clock {
-  font-family: digital-7, monospace;
+  font-family: Arial, Helvetica, sans-serif
 }
 
 .message-box {

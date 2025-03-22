@@ -9,7 +9,7 @@ module.exports = {
         '10xl': '10rem',
       },
       animation: {
-        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;',
+        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;',
       }
     }
   },
