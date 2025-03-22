@@ -1,57 +1,65 @@
 <template>
-  <div
-    :style="{
-      backgroundColor: update.isReset ? settings.colors.resetBackground : backgroundColor,
-    }"
-    v-if="settings.contentAtReset === ContentAtReset.Empty && update.isReset" class="drag"></div>
+  <div :style="{
+    backgroundColor: update.isReset ? settings.colors.resetBackground : backgroundColor,
+  }" v-if="settings.contentAtReset === ContentAtReset.Empty && update.isReset" class="drag"></div>
+
+  <div class="drag relative-container">
+    <transition name="slide-down">
+      <div v-if="messageUpdate.message" class="message-box-float" :class="{
+        'message-box': true
+      }">
+        {{ messageUpdate.message }}
+      </div>
+    </transition>
+  </div>
   <div
     v-if="settings.contentAtReset !== ContentAtReset.Empty || (settings.contentAtReset === ContentAtReset.Empty && !update.isReset)"
     :style="{
       backgroundColor: update.isReset ? settings.colors.resetBackground : backgroundColor,
       ...cssVars
-    }"
-    class="flex justify-center flex-col drag"
-  >
-    <div
-      :class="{
-        'message-box': true,
-        'message-box-fixed-height': settings.messageBoxFixedHeight || !!messageUpdate.message,
-      }"
-    >
-      {{ messageUpdate.message }}
-    </div>
-    <div
-      v-if="settings.show.timer && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
-      class="text-center text-time font-digital-clock"
-      :style="{
-        color: timerText
-      }"
-      :class="{
-        'animate-pulse-fast': !update.isReset && update.isCountingUp && settings.pulseAtZero
-      }"
-    >
-      {{ timer }}
-    </div>
-    <progress-bar
-      v-if="settings.show.progress && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
-      :is-expiring="update.isExpiring"
-      :is-counting-up="update.isCountingUp"
-      :is-reset="update.isReset"
-      :value="progressBarPercent" />
-    <clock
-      v-if="showClock"
-      :clock-color="settings.colors.clock"
-      :text-color="settings.colors.clockText"
-      :is-big="settings.contentAtReset === ContentAtReset.Time && update.isReset"
-      :seconds-on-clock="settings.show.secondsOnClock"
-      :use12-hour-clock="settings.use12HourClock"
-    />
+    }" class="flex justify-center flex-col drag">
+    <transition name="fade" mode="out-in">
+      <div v-if="!update.isRunning" class="fundo">
+        <clock-big v-if="showClock" :clock-color="settings.colors.clock" :text-color="settings.colors.clockText"
+          :is-big="settings.contentAtReset === ContentAtReset.Time && update.isReset"
+          :seconds-on-clock="settings.show.secondsOnClock" :use12-hour-clock="settings.use12HourClock" />
+      </div>
+      <div v-else class="overlay">
+        <div
+          v-if="!isBigNumber && settings.show.timer && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
+          class="text-center text-time font-digital-clock" :style="{ color: timerText }" :class="{
+            'animate-pulse-fast': !update.isReset && update.isCountingUp && settings.pulseAtZero
+          }">
+          <span class="M1">{{ timerDigits[0] }}</span>
+          <span class="M2">{{ timerDigits[1] }}</span>
+          <span class="separador">:</span>
+          <span class="S1">{{ timerDigits[2] }}</span>
+          <span class="S2">{{ timerDigits[3] }}</span>
+        </div>
+
+        <div
+          v-if="isBigNumber && settings.show.timer && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
+          class="text-center text-time font-digital-clock" :style="{ color: timerText }" :class="{
+            'animate-pulse-fast': !update.isReset && update.isCountingUp && settings.pulseAtZero
+          }">
+          <span class="S2">{{ timer }}</span>
+        </div>
+        <progress-bar
+          v-if="settings.show.progress && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
+          :is-expiring="update.isExpiring" :is-counting-up="update.isCountingUp" :is-reset="update.isReset"
+          :value="progressBarPercent" />
+        <clock v-if="showClock" :clock-color="settings.colors.clock" :text-color="settings.colors.clockText"
+          :is-big="settings.contentAtReset === ContentAtReset.Time && update.isReset"
+          :seconds-on-clock="settings.show.secondsOnClock" :use12-hour-clock="settings.use12HourClock" />
+      </div>
+    </transition>
   </div>
 </template>
 
+
 <script lang="ts" setup>
-import {computed, onMounted, ref} from "vue";
-import {ipcRenderer} from 'electron'
+import { computed, onMounted, ref } from "vue";
+import { ipcRenderer } from 'electron'
 //import { Howl } from 'howler'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
@@ -60,10 +68,11 @@ import {
   DEFAULT_WINDOW_SETTINGS,
   WindowSettings
 } from "../../common/config";
-import {MessageUpdate, TimerEngineUpdate} from "../../common/TimerInterfaces";
+import { MessageUpdate, TimerEngineUpdate } from "../../common/TimerInterfaces";
 import ProgressBar from "../components/ProgressBar.vue";
 import Clock from "../components/Clock.vue";
-import {IpcGetWindowSettingsArgs} from "../../common/IpcInterfaces";
+import ClockBig from "../components/ClockBig.vue";
+import { IpcGetWindowSettingsArgs } from "../../common/IpcInterfaces";
 
 dayjs.extend(duration)
 
@@ -101,6 +110,30 @@ const timer = computed(() => {
   }
 });
 
+const timerDigits = computed(() => {
+  const currentTimeInSeconds = dayjs.duration(Math.abs(update.value.currentSeconds), 'seconds');
+
+  let minutes: string;
+  let seconds: string;
+
+  if (settings.value.show.hours) {
+    // Se quiser suportar horas, pode adaptar aqui
+    const full = currentTimeInSeconds.format('HH:mm:ss'); // HH:MM:SS
+    // pega apenas MMSS
+    minutes = full.slice(3, 5); // MM
+    seconds = full.slice(6, 8); // SS
+  } else {
+    minutes = String(Math.floor(currentTimeInSeconds.asMinutes())).padStart(2, '0');
+    seconds = String(currentTimeInSeconds.seconds()).padStart(2, '0');
+  }
+
+  return [...minutes, ...seconds];
+});
+
+const isBigNumber = computed(() => {
+  return update.value.currentSeconds > 5400;
+});
+
 const showClock = computed(() => {
   if (update.value.isReset) {
     if (settings.value.contentAtReset === ContentAtReset.Time) return true;
@@ -116,10 +149,13 @@ const progressBarPercent = computed(() => {
 });
 
 const timerText = computed(() => {
+  if(update.value.isExpiring) {
+    return "oklch(0.795 0.184 86.047)" //YELLOW
+  }
   if (update.value.isCountingUp && !update.value.isReset) {
-    return settings.value.colors.timerFinishedText
+    return "oklch(0.505 0.213 27.518)"
   } else {
-    return settings.value.colors.text
+    return "oklch(0.871 0.15 154.449)" //GREEN
   }
 })
 
@@ -176,19 +212,84 @@ onMounted(async () => {
   font-family: Arial, Helvetica, sans-serif
 }
 
-.message-box {
+
+/* TRANSIÇÃO FADE */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+}
+
+.relative-container {
+  position: absolute;
+}
+
+.message-box-float {
+  position: relative;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
   display: flex;
+  justify-content: center;   /* Centraliza horizontalmente */
+  align-items: center;       /* Centraliza verticalmente */
+  text-align: center;        /* Centraliza linhas múltiplas */
+  flex-wrap: wrap;
+
+  padding: 16px 24px;
+  max-width: 99%;
+  min-height: 20vh;
+  background-color: rgba(68, 68, 68, 0.7);
+  color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+
+  font-size: clamp(1rem, 11vw, 13vh); /* adapta à tela */
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.message-box {
   justify-content: center;
   align-items: center;
-  font-size: min(18vh, 12vw, calc(min(18vh, 12vw) * var(--magic-number-font-size) / var(--message-length)));
   color: white;
   text-align: center;
   line-height: 1;
 }
 
-.message-box-fixed-height {
-  height: min(18vh, 12vw);
+/* TRANSIÇÃO SLIDE */
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.4s ease;
+}
+
+.slide-down-enter-from {
+  transform: translate(-50%, -20px);
+  opacity: 0;
+}
+
+.slide-down-enter-to {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+
+.slide-down-leave-from {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+
+.slide-down-leave-to {
+  transform: translate(-50%, -20px);
+  opacity: 0;
 }
 </style>
-
-10:14=x:25

@@ -35,7 +35,7 @@ defineProps<Props>();
 
 <style scoped>
 .progress-bar {
-  height: 6vh;
+  height: 4vh;
   margin: 0 1vw 0 1vw;
 }
 </style>

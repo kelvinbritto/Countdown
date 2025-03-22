@@ -13,14 +13,14 @@ export interface Props {
 
 const props = defineProps<Props>();
 
+
 let currentTimeTimerId: NodeJS.Timer = null;
-let currentTime = ref(dayjs().format('dddd, DD.MM.YYYY HH:mm'));
+let currentTime = ref(dayjs().format('HH:mm'));
+let currentDate = ref(dayjs().format('dddd, DD.MM.YYYY'));
 function updateTime() {
-  if (!props.use12HourClock) {
-    currentTime.value = dayjs().format('dddd, DD.MM.YYYY HH:mm');
-  }
-  if(props.use12HourClock) {
-    currentTime.value = dayjs().format('dddd, DD.MM.YYYY hh:mm');
+  if (props.secondsOnClock && !props.use12HourClock) {
+    currentTime.value = dayjs().format('HH:mm');
+    currentDate.value = dayjs().format('dddd, DD.MM.YYYY');
   }
 }
 
@@ -33,13 +33,18 @@ onMounted(() => {
 
 <template>
   <div
-    class="text-right text-clock"
+    class="text-center text-clock"
     :class="{
         'text-clock': !isBig,
         'text-clock-on-reset': isBig
       }"
   >
     <span class="ml-5" :style="{color: textColor}">{{ currentTime }}</span>
+  </div>
+  <div
+  class="text-center text-date"
+  >
+    <span class="ml-5" :style="{color: textColor}">{{ currentDate }}</span>
   </div>
 </template>
 
@@ -55,8 +60,13 @@ onMounted(() => {
 }
 
 .text-clock {
-  font-size: min(4vh, 5vw);
-  margin-right: 2vw;
+  font-size: min(40vh, 30vw);
+  font-weight: lighter;
+}
+
+.text-date {
+  font-size: min(10vh, 10vw);
+  font-weight: lighter;
   margin-top: 3vh;
 }
 

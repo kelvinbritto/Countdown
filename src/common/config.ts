@@ -5,6 +5,8 @@ export const DEFAULT_RESET_BACKGROUND_COLOR = '#000000ff';
 export const DEFAULT_BACKGROUND_OPACITY = '255';
 export const DEFAULT_TEXT_COLOR = '#ffffff';
 export const DEFAULT_TIMER_FINISHED_TEXT_COLOR = '#ff0000';
+export const DEFAULT_TIMER_GOOD_TEXT_COLOR = '#00ff00';
+export const DEFAULT_TIMER_EXPIRING_TEXT_COLOR = '#ffff00';
 export const DEFAULT_CLOCK_COLOR = '#ffffff';
 export const DEFAULT_CLOCK_TEXT_COLOR = '#ffffff';
 
@@ -73,6 +75,8 @@ export const DEFAULT_TIMER_COLORS: WindowColors = {
   resetBackground: DEFAULT_RESET_BACKGROUND_COLOR,
   text: DEFAULT_TEXT_COLOR,
   timerFinishedText: DEFAULT_TIMER_FINISHED_TEXT_COLOR,
+  timerTextExpiring: DEFAULT_TIMER_EXPIRING_TEXT_COLOR,
+  timerTextGood: DEFAULT_TIMER_GOOD_TEXT_COLOR,
   clock: DEFAULT_CLOCK_COLOR,
   clockText: DEFAULT_CLOCK_TEXT_COLOR,
 }
@@ -143,6 +147,8 @@ export interface WindowColors {
   resetBackground: string
   text: string
   timerFinishedText: string
+  timerTextGood: string
+  timerTextExpiring: string
   clock: string
   clockText: string
 }

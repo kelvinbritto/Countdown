@@ -45,6 +45,8 @@ export class MoveSettingsToWindow implements BaseMigration {
               resetBackground: settings.resetBackgroundColor,
               text: settings.textColor,
               timerFinishedText: settings.timerFinishedTextColor,
+              timerTextGood: settings.timerTextGood,
+              timerTextExpiring: settings.timerTextExpiring,
               clock: settings.clockColor,
               clockText: settings.clockTextColor,
             },
