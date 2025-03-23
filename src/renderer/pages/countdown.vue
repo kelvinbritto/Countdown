@@ -30,10 +30,10 @@
           class="text-center text-time font-digital-clock" :style="{ color: timerText }" :class="{
             'animate-pulse-fast': !update.isReset && update.isCountingUp && settings.pulseAtZero
           }">
-          <span class="M1">{{ timerDigits[0] }}</span>
-          <span class="M2">{{ timerDigits[1] }}</span>
-          <span class="separador">:</span>
-          <span class="S1">{{ timerDigits[2] }}</span>
+          <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 600 }"> {{ timerDigits[0] }} </span>
+          <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 60 }">{{ timerDigits[1] }}</span>
+          <span :class="{ grayText: !update.isCountingUp }">:</span>
+          <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 10 }">{{ timerDigits[2] }}</span>
           <span class="S2">{{ timerDigits[3] }}</span>
         </div>
 
@@ -110,6 +110,7 @@ const timer = computed(() => {
   }
 });
 
+
 const timerDigits = computed(() => {
   const currentTimeInSeconds = dayjs.duration(Math.abs(update.value.currentSeconds), 'seconds');
 
@@ -145,11 +146,11 @@ const showClock = computed(() => {
 const progressBarPercent = computed(() => {
   if (update.value.secondsSetOnCurrentTimer === 0 || update.value.currentSeconds === 0) return 100;
   if (update.value.isCountingUp) return 100;
-  return update.value.currentSeconds * 100 / update.value.secondsSetOnCurrentTimer;
+  return ((update.value.secondsSetOnCurrentTimer - update.value.currentSeconds) * 100 / update.value.secondsSetOnCurrentTimer);
 });
 
 const timerText = computed(() => {
-  if(update.value.isExpiring) {
+  if (update.value.isExpiring) {
     return "oklch(0.795 0.184 86.047)" //YELLOW
   }
   if (update.value.isCountingUp && !update.value.isReset) {
@@ -157,7 +158,7 @@ const timerText = computed(() => {
   } else {
     return "oklch(0.871 0.15 154.449)" //GREEN
   }
-})
+});
 
 const backgroundColor = computed(() => {
   return settings.value.colors.background;
@@ -212,7 +213,6 @@ onMounted(async () => {
   font-family: Arial, Helvetica, sans-serif
 }
 
-
 /* TRANSIÇÃO FADE */
 .fade-enter-active,
 .fade-leave-active {
@@ -240,9 +240,12 @@ onMounted(async () => {
   transform: translateX(-50%);
 
   display: flex;
-  justify-content: center;   /* Centraliza horizontalmente */
-  align-items: center;       /* Centraliza verticalmente */
-  text-align: center;        /* Centraliza linhas múltiplas */
+  justify-content: center;
+  /* Centraliza horizontalmente */
+  align-items: center;
+  /* Centraliza verticalmente */
+  text-align: center;
+  /* Centraliza linhas múltiplas */
   flex-wrap: wrap;
 
   padding: 16px 24px;
@@ -254,7 +257,8 @@ onMounted(async () => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   z-index: 1000;
 
-  font-size: clamp(1rem, 11vw, 13vh); /* adapta à tela */
+  font-size: clamp(1rem, 11vw, 13vh);
+  /* adapta à tela */
   line-height: 1.2;
   word-break: break-word;
 }
@@ -291,5 +295,9 @@ onMounted(async () => {
 .slide-down-leave-to {
   transform: translate(-50%, -20px);
   opacity: 0;
+}
+
+.grayText {
+  color: rgb(50, 50, 50);
 }
 </style>

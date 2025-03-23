@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {ClockIcon} from '@heroicons/vue/24/solid';
+import { ClockIcon } from '@heroicons/vue/24/solid';
 import dayjs from "dayjs";
-import {onMounted, ref} from "vue";
+import { onMounted, ref } from "vue";
 
 export interface Props {
   isBig: boolean
@@ -16,11 +16,16 @@ const props = defineProps<Props>();
 
 let currentTimeTimerId: NodeJS.Timer = null;
 let currentTime = ref(dayjs().format('HH:mm'));
-let currentDate = ref(dayjs().format('dddd, DD.MM.YYYY'));
+let currentDate = ref(dayjs().format('dddd, DD MMMM YYYY'));
 function updateTime() {
-  if (props.secondsOnClock && !props.use12HourClock) {
+  if (!props.use12HourClock) {
     currentTime.value = dayjs().format('HH:mm');
-    currentDate.value = dayjs().format('dddd, DD.MM.YYYY');
+    currentDate.value = dayjs().format('dddd, DD MMMM YYYY');
+  }
+
+  if (props.use12HourClock) {
+    currentTime.value = dayjs().format('hh:mm');
+    currentDate.value = dayjs().format('dddd, DD MMMM YYYY');
   }
 }
 
@@ -32,20 +37,18 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    class="text-center text-clock"
-    :class="{
-        'text-clock': !isBig,
-        'text-clock-on-reset': isBig
-      }"
-  >
-    <span class="ml-5" :style="{color: textColor}">{{ currentTime }}</span>
+
+  <div class="text-center text-clock" :class="{
+    'text-clock': !isBig,
+    'text-clock-on-reset': isBig
+  }">
+    <span class="ml-5" :style="{ color: textColor }">{{ currentTime }}</span>
   </div>
-  <div
-  class="text-center text-date"
-  >
-    <span class="ml-5" :style="{color: textColor}">{{ currentDate }}</span>
+
+  <div class="text-center text-date">
+    <span class="ml-5" :style="{ color: textColor }">{{ currentDate }}</span>
   </div>
+
 </template>
 
 <style scoped>

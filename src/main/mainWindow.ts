@@ -10,7 +10,7 @@ export default function createMainWindow (options: BrowserWindowConstructorOptio
       width: 920,
       minWidth: 920,
       minHeight: 590,
-      title: `Countdown Settings - Countdown v${APP_VERSION}`
+      title: `Countdown Settings - Countdown (kbrito_version) v${APP_VERSION}`
     },
     ...options,
   }
@@ -21,7 +21,7 @@ export default function createMainWindow (options: BrowserWindowConstructorOptio
     // Or load custom url
     // _browserWindow.loadURL('https://google.com')
     if (isDev) {
-      winHandler.browserWindow.webContents.openDevTools();
+      //winHandler.browserWindow.webContents.openDevTools();
     }
   })
 
