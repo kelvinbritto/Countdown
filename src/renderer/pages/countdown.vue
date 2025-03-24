@@ -18,19 +18,21 @@
       backgroundColor: update.isReset ? settings.colors.resetBackground : backgroundColor,
       ...cssVars
     }" class="flex justify-center flex-col drag">
+
     <transition name="fade" mode="out-in">
       <div v-if="!update.isRunning" class="fundo">
         <clock-big v-if="showClock" :clock-color="settings.colors.clock" :text-color="settings.colors.clockText"
           :is-big="settings.contentAtReset === ContentAtReset.Time && update.isReset"
           :seconds-on-clock="settings.show.secondsOnClock" :use12-hour-clock="settings.use12HourClock" />
       </div>
-      <div v-else class="overlay">
+    <div v-else class="overlay">
+      <div class="timer">
         <div
           v-if="!isBigNumber && settings.show.timer && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
           class="text-center text-time font-digital-clock" :style="{ color: timerText }" :class="{
             'animate-pulse-fast': !update.isReset && update.isCountingUp && settings.pulseAtZero
           }">
-          <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 600 }"> {{ timerDigits[0] }} </span>
+          <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 600 }"> {{ timerDigits[0] }}</span>
           <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 60 }">{{ timerDigits[1] }}</span>
           <span :class="{ grayText: !update.isCountingUp }">:</span>
           <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 10 }">{{ timerDigits[2] }}</span>
@@ -44,14 +46,15 @@
           }">
           <span class="S2">{{ timer }}</span>
         </div>
-        <progress-bar
-          v-if="settings.show.progress && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
-          :is-expiring="update.isExpiring" :is-counting-up="update.isCountingUp" :is-reset="update.isReset"
-          :value="progressBarPercent" />
-        <clock v-if="showClock" :clock-color="settings.colors.clock" :text-color="settings.colors.clockText"
-          :is-big="settings.contentAtReset === ContentAtReset.Time && update.isReset"
-          :seconds-on-clock="settings.show.secondsOnClock" :use12-hour-clock="settings.use12HourClock" />
       </div>
+      <progress-bar
+        v-if="settings.show.progress && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
+        :is-expiring="update.isExpiring" :is-counting-up="update.isCountingUp" :is-reset="update.isReset"
+        :value="progressBarPercent" />
+      <clock v-if="showClock" :clock-color="settings.colors.clock" :text-color="settings.colors.clockText"
+        :is-big="settings.contentAtReset === ContentAtReset.Time && update.isReset"
+        :seconds-on-clock="settings.show.secondsOnClock" :use12-hour-clock="settings.use12HourClock" />
+    </div>
     </transition>
   </div>
 </template>
@@ -146,7 +149,9 @@ const showClock = computed(() => {
 const progressBarPercent = computed(() => {
   if (update.value.secondsSetOnCurrentTimer === 0 || update.value.currentSeconds === 0) return 100;
   if (update.value.isCountingUp) return 100;
-  return ((update.value.secondsSetOnCurrentTimer - update.value.currentSeconds) * 100 / update.value.secondsSetOnCurrentTimer);
+  let i = ((update.value.secondsSetOnCurrentTimer - update.value.currentSeconds) * 100 / update.value.secondsSetOnCurrentTimer);
+  console.log(update.value);
+  return i;
 });
 
 const timerText = computed(() => {
@@ -205,8 +210,16 @@ onMounted(async () => {
   -webkit-app-region: drag;
 }
 
+.timer {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+}
+
 .text-time {
   font-size: min(40vh, 25vw);
+  display: flex;
 }
 
 .font-digital-clock {

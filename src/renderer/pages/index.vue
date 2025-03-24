@@ -1,13 +1,9 @@
 <template>
   <div class="main-container flex flex-col bg-zinc-700">
     <div class="flex flex-row justify-between p-1 gap-2 items-center">
-      <navigation :selected-tab="tab"/>
+      <navigation :selected-tab="tab" />
       <div class="flex-1"></div>
-      <s-button
-        v-if="tab === 'remote'"
-        class="self-end"
-        @click="save"
-      >
+      <s-button v-if="tab === 'remote'" class="self-end" @click="save">
         Save
       </s-button>
       <card class="bg-white self-end p-0">
@@ -20,7 +16,7 @@
       <div class="flex gap-2">
         <card class="clock-setup justify-center">
           <div class="uppercase text-white">Set</div>
-          <time-input @update:modelValue="timerControl.set($event);" :modelValue="update.setSeconds" color="white"/>
+          <time-input @update:modelValue="timerControl.set($event);" :modelValue="update.setSeconds" color="white" />
           <div class="uppercase mt-2 text-white flex flex-row justify-between">
             <span>Count</span>
             <div class="flex flex-row items-center gap-1">
@@ -29,25 +25,17 @@
             </div>
 
           </div>
-          <time-input :modelValue="update.countSeconds" color="green" :disabled="true"/>
+          <time-input :modelValue="update.countSeconds" color="green" :disabled="true" />
           <div class="uppercase mt-2 text-white">Extra</div>
-          <time-input color="red" :modelValue="update.extraSeconds" :disabled="true"/>
+          <time-input color="red" :modelValue="update.extraSeconds" :disabled="true" />
         </card>
         <card class="control-buttons">
           <s-button class="text-4xl mb-2 font-mono uppercase" @click="timerControl.start">Start</s-button>
-          <s-button
-            :disabled="update.isReset"
-            class="text-4xl mb-2 font-mono uppercase"
-            type="warning"
-            @click="timerControl.toggle"
-          >
+          <s-button :disabled="update.isReset" class="text-4xl mb-2 font-mono uppercase" type="warning"
+            @click="timerControl.toggle">
             {{ update.isRunning ? "Pause" : "Resume" }}
           </s-button>
-          <s-button
-            class="text-4xl mb-2 font-mono uppercase"
-            type="danger"
-            @click="timerControl.reset"
-          >
+          <s-button class="text-4xl mb-2 font-mono uppercase" type="danger" @click="timerControl.reset">
             Reset
           </s-button>
           <div class="flex gap-2 justify-center">
@@ -83,42 +71,31 @@
         <card class="flex-1">
           <div class="uppercase text-white">Message</div>
           <div class="flex gap-2">
-            <input-with-button type="text" @input="value => message = value" :model-value="message" @click="sendMessage">Send</input-with-button>
-            <button @click="deleteMessage" class="mt-1 relative inline-flex items-center space-x-2 px-2 py-1 border border-red-600 text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-500 focus:outline-none focus:ring-1 focus:ring-red-400 focus:border-red-500">
+            <input-with-button type="text" @input="value => message = value" :model-value="message"
+              @click="sendMessage">Send</input-with-button>
+            <button @click="deleteMessage"
+              class="mt-1 relative inline-flex items-center space-x-2 px-2 py-1 border border-red-600 text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-500 focus:outline-none focus:ring-1 focus:ring-red-400 focus:border-red-500">
               <trash-icon class="w-5 h-5 inline-flex" />
             </button>
           </div>
         </card>
       </div>
       <card class="presets inline-flex gap-2 overflow-x-auto">
-        <s-button
-          v-for="(preset, index) in settings.presets"
-          :key="index" type="info"
-          @click="setPresetTime(preset)"
-        >
+        <s-button v-for="(preset, index) in settings.presets" :key="index" type="info" @click="setPresetTime(preset)">
           {{ preset }}
         </s-button>
       </card>
     </div>
-    <settings-tab
-      v-if="tab === 'settings'"
-      :screens="screens"
-      :selected-screen="selectedScreen"
-      @settings-updated="settingsUpdated"
-    />
-    <remote-tab
-      v-if="tab === 'remote'"
-      ref="remoteTabRef" />
-    <windows-tab
-      :screens="screens"
-      v-if="tab === 'windows'"
-    />
+    <settings-tab v-if="tab === 'settings'" :screens="screens" :selected-screen="selectedScreen"
+      @settings-updated="settingsUpdated" />
+    <remote-tab v-if="tab === 'remote'" ref="remoteTabRef" />
+    <windows-tab :screens="screens" v-if="tab === 'windows'" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import {nextTick, onMounted, ref} from "vue";
-import {ipcRenderer} from 'electron'
+import { nextTick, onMounted, ref } from "vue";
+import { ipcRenderer } from 'electron'
 import Card from '../components/Card.vue'
 import SButton from '../components/SButton.vue'
 import TimeInput from '../components/TimeInput.vue'
@@ -132,12 +109,12 @@ import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 dayjs.extend(duration)
 import RemoteTab from "../components/RemoteTab.vue";
-import {TimerEngineUpdate} from "../../common/TimerInterfaces";
-import {TimerControl} from "../TimerControl";
+import { TimerEngineUpdate } from "../../common/TimerInterfaces";
+import { TimerControl } from "../TimerControl";
 import Display = Electron.Display;
 import InputWithButton from "../components/InputWithButton.vue";
-import {CountdownSettings, DEFAULT_STORE} from "../../common/config";
-import {Howl} from "howler";
+import { CountdownSettings, DEFAULT_STORE } from "../../common/config";
+// import {Howl} from "howler";
 /*
 import { Howl } from "howler";
 import gong from "../assets/sounds/gong.mp3";
@@ -243,7 +220,6 @@ function save() {
 </script>
 
 <style scoped>
-
 .main-container {
   height: 100%;
   gap: 10px;
@@ -263,8 +239,7 @@ function save() {
   min-width: 250px;
 }
 
-.presets {
-}
+.presets {}
 
 .top-menu {
   height: 50px;

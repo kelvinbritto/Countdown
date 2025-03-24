@@ -1,20 +1,25 @@
-import {Timer} from "./Utilities/Timer.ts";
+import { Timer } from "./Utilities/Timer.ts";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration.js";
 import {
-  MessageUpdateCallback, PlaySoundCallback,
+  MessageUpdateCallback,
+  PlaySoundCallback,
   UpdateCallback,
-  WebSocketUpdateCallback
+  WebSocketUpdateCallback,
 } from "../common/TimerInterfaces.ts";
-import {DEFAULT_SET_TIME_LIVE, DEFAULT_STOP_TIMER_AT_ZERO, DEFAULT_YELLOW_AT_OPTION} from "../common/config.ts";
+import {
+  DEFAULT_SET_TIME_LIVE,
+  DEFAULT_STOP_TIMER_AT_ZERO,
+  DEFAULT_YELLOW_AT_OPTION,
+} from "../common/config.ts";
 dayjs.extend(duration);
 
 export interface TimerEngineOptions {
-  yellowAt?: number
-  yellowAtOption?: string
-  setTimeLive?: boolean
-  stopTimerAtZero?: boolean
-  audioFile?: string
+  yellowAt?: number;
+  yellowAtOption?: string;
+  setTimeLive?: boolean;
+  stopTimerAtZero?: boolean;
+  audioFile?: string;
 }
 
 export class TimerEngine {
@@ -29,7 +34,7 @@ export class TimerEngine {
     yellowAtOption: DEFAULT_YELLOW_AT_OPTION,
     setTimeLive: DEFAULT_SET_TIME_LIVE,
     audioFile: null,
-  }
+  };
   totalSeconds = 0;
   timerIsRunning = false;
   audioEnabled = true;
@@ -38,12 +43,23 @@ export class TimerEngine {
   messageUpdate: MessageUpdateCallback = null;
   playSound: PlaySoundCallback = null;
 
-  constructor(interval: number, options: TimerEngineOptions, update: UpdateCallback, webSocketUpdate: WebSocketUpdateCallback, messageUpdate: MessageUpdateCallback, playSound: PlaySoundCallback) {
-    this._timer = new Timer(interval, this._timerTick.bind(this), this._timerStatusChanged.bind(this))
+  constructor(
+    interval: number,
+    options: TimerEngineOptions,
+    update: UpdateCallback,
+    webSocketUpdate: WebSocketUpdateCallback,
+    messageUpdate: MessageUpdateCallback,
+    playSound: PlaySoundCallback
+  ) {
+    this._timer = new Timer(
+      interval,
+      this._timerTick.bind(this),
+      this._timerStatusChanged.bind(this)
+    );
     this.options = {
       ...this.options,
       ...options,
-    }
+    };
 
     this.update = update;
     this.webSocketUpdate = webSocketUpdate;
@@ -80,13 +96,18 @@ export class TimerEngine {
       return false;
     }
 
-    if (this.options.yellowAtOption === 'minutes'
-        && this.options.yellowAt >= this._currentSeconds / 60) {
+    if (
+      this.options.yellowAtOption === "minutes" &&
+      this.options.yellowAt >= this._currentSeconds / 60
+    ) {
       return true;
     }
 
-    if (this.options.yellowAtOption === 'percent'
-        && this.options.yellowAt >= this._currentSeconds * 100 / this._timer.secondsSet) {
+    if (
+      this.options.yellowAtOption === "percent" &&
+      this.options.yellowAt >=
+        (this._currentSeconds * 100) / this._timer.secondsSet
+    ) {
       return true;
     }
 
@@ -95,7 +116,7 @@ export class TimerEngine {
 
   endsAt() {
     if (this.countSeconds() <= 0) return null;
-    return dayjs().add(this._currentSeconds, 's').format('HH:mm');
+    return dayjs().add(this._currentSeconds, "s").format("HH:mm");
   }
 
   setTimerInterval(interval: number) {
@@ -170,6 +191,11 @@ export class TimerEngine {
   jogCurrent(seconds: number) {
     if (!this._timer.isRunning()) return;
     this._timer.add(seconds);
+
+    if ((this._secondsSetOnCurrentTimer + seconds) > this._secondsSetOnCurrentTimer) {
+      this._secondsSetOnCurrentTimer += seconds;
+    }
+
     this._sendUpdate();
   }
 
@@ -223,53 +249,63 @@ export class TimerEngine {
       isRunning: this.timerIsRunning,
       isCountingUp: this.isCountingUp(),
       timerEndsAt: this.endsAt(),
-    })
+    });
   }
 
   private _sendWebSocketUpdate() {
     const isExpired = this._currentSeconds <= 0;
 
-    let state = 'Running';
+    let state = "Running";
     if (this.isReset()) {
-      state = 'Not Running';
+      state = "Not Running";
     } else if (!this.timerIsRunning) {
-      state = 'Paused';
+      state = "Paused";
     } else if (isExpired) {
       if (this.audioEnabled && !this._audioRun) {
-        this.playSound(this.options.audioFile)
+        this.playSound(this.options.audioFile);
         this._audioRun = true;
       }
-      state = 'Expired';
+      state = "Expired";
     } else if (this.isExpiring()) {
-      state = 'Expiring';
+      state = "Expiring";
     }
 
-    const setTimeDuration = dayjs.duration(Math.abs(this.totalSeconds), 'seconds');
-    const currentTimeDuration = dayjs.duration(Math.abs(this._currentSeconds), 'seconds');
-    const timeSetOnCurrentTimerDuration = dayjs.duration(this._timer.secondsSet, 'seconds');
+    const setTimeDuration = dayjs.duration(
+      Math.abs(this.totalSeconds),
+      "seconds"
+    );
+    const currentTimeDuration = dayjs.duration(
+      Math.abs(this._currentSeconds),
+      "seconds"
+    );
+    const timeSetOnCurrentTimerDuration = dayjs.duration(
+      this._timer.secondsSet,
+      "seconds"
+    );
 
     this.webSocketUpdate({
       state: state,
       setTime: this.totalSeconds,
-      setTimeHms: setTimeDuration.format('HH:mm:ss'),
-      setTimeMs: setTimeDuration.format('mm:ss'),
-      setTimeH: setTimeDuration.format('HH'),
-      setTimeM: setTimeDuration.format('mm'),
-      setTimeS: setTimeDuration.format('ss'),
-      currentTimeHms: currentTimeDuration.format('HH:mm:ss'),
-      currentTimeMs: currentTimeDuration.format('mm:ss'),
-      currentTimeH: currentTimeDuration.format('HH'),
-      currentTimeM: currentTimeDuration.format('mm'),
-      currentTimeS: currentTimeDuration.format('ss'),
+      setTimeHms: setTimeDuration.format("HH:mm:ss"),
+      setTimeMs: setTimeDuration.format("mm:ss"),
+      setTimeH: setTimeDuration.format("HH"),
+      setTimeM: setTimeDuration.format("mm"),
+      setTimeS: setTimeDuration.format("ss"),
+      currentTimeHms: currentTimeDuration.format("HH:mm:ss"),
+      currentTimeMs: currentTimeDuration.format("mm:ss"),
+      currentTimeH: currentTimeDuration.format("HH"),
+      currentTimeM: currentTimeDuration.format("mm"),
+      currentTimeS: currentTimeDuration.format("ss"),
       currentTime: this._currentSeconds,
       timeSetOnCurrentTimer: this._timer.secondsSet,
-      timeSetOnCurrentTimerHms: timeSetOnCurrentTimerDuration.format('HH:mm:ss'),
-      timeSetOnCurrentTimerMs: timeSetOnCurrentTimerDuration.format('mm:ss'),
-      timeSetOnCurrentTimerH: timeSetOnCurrentTimerDuration.format('HH'),
-      timeSetOnCurrentTimerM: timeSetOnCurrentTimerDuration.format('mm'),
-      timeSetOnCurrentTimerS: timeSetOnCurrentTimerDuration.format('ss'),
+      timeSetOnCurrentTimerHms:
+        timeSetOnCurrentTimerDuration.format("HH:mm:ss"),
+      timeSetOnCurrentTimerMs: timeSetOnCurrentTimerDuration.format("mm:ss"),
+      timeSetOnCurrentTimerH: timeSetOnCurrentTimerDuration.format("HH"),
+      timeSetOnCurrentTimerM: timeSetOnCurrentTimerDuration.format("mm"),
+      timeSetOnCurrentTimerS: timeSetOnCurrentTimerDuration.format("ss"),
       timerEndsAt: this.endsAt(),
-    })
+    });
   }
 
   _timerStatusChanged() {

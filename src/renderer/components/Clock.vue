@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import {ClockIcon} from '@heroicons/vue/24/solid';
 import dayjs from "dayjs";
 import {onMounted, ref} from "vue";
 
@@ -44,6 +43,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
+
 .clock-icon {
   height: min(20vh, 15vw);
   width: min(20vh, 15vw);
@@ -58,6 +58,7 @@ onMounted(() => {
   font-size: min(4vh, 5vw);
   margin-right: 2vw;
   margin-top: 3vh;
+  font-weight: 200;
 }
 
 .text-clock-on-reset {

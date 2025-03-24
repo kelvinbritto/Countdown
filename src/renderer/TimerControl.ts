@@ -14,6 +14,7 @@ import {
 } from "../common/IpcInterfaces.ts";
 
 export class TimerControl {
+
   constructor(updateCallback: (update: TimerEngineUpdate) => void) {
     ipcRenderer.on('update', (event, update) => {
       updateCallback(update);
