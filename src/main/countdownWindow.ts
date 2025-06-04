@@ -9,8 +9,8 @@ export default function createCountdownWindow (timerId: number, windowId: number
         "timer": timerId.toString(),
         "window": windowId.toString()
       });
-      winHandler.browserWindow.webContents.openDevTools();
-    })
+      //winHandler.browserWindow.webContents.openDevTools();
+    });
 
   return winHandler
 }

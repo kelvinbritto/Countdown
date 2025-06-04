@@ -20,41 +20,45 @@
     }" class="flex justify-center flex-col drag">
 
     <transition name="fade" mode="out-in">
-      <div v-if="!update.isRunning" class="fundo">
-        <clock-big v-if="showClock" :clock-color="settings.colors.clock" :text-color="settings.colors.clockText"
+      <div v-if="update.isReset && settings.show.clock" class="fundo">
+        <clock-big :clock-color="settings.colors.clock" :text-color="settings.colors.clockText"
           :is-big="settings.contentAtReset === ContentAtReset.Time && update.isReset"
           :seconds-on-clock="settings.show.secondsOnClock" :use12-hour-clock="settings.use12HourClock" />
       </div>
-    <div v-else class="overlay">
-      <div class="timer">
-        <div
-          v-if="!isBigNumber && settings.show.timer && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
-          class="text-center text-time font-digital-clock" :style="{ color: timerText }" :class="{
-            'animate-pulse-fast': !update.isReset && update.isCountingUp && settings.pulseAtZero
-          }">
-          <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 600 }"> {{ timerDigits[0] }}</span>
-          <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 60 }">{{ timerDigits[1] }}</span>
-          <span :class="{ grayText: !update.isCountingUp }">:</span>
-          <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 10 }">{{ timerDigits[2] }}</span>
-          <span class="S2">{{ timerDigits[3] }}</span>
+      <div v-else class="overlay">
+        <div class="text-left text-white tracking-wide text-5xl font-bold mb-4 ml-10">
+          {{ title }}
         </div>
+        <div class="timer">
+          <div
+            v-if="!isBigNumber && settings.show.timer && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
+            class="text-center text-time font-digital-clock" :style="{ color: timerText }" :class="{
+              'animate-pulse-fast': !update.isReset && update.isCountingUp && settings.pulseAtZero
+            }">
+            <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 600 }"> {{ timerDigits[0]
+            }}</span>
+            <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 60 }">{{ timerDigits[1] }}</span>
+            <span :class="{ grayText: !update.isCountingUp }">:</span>
+            <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 10 }">{{ timerDigits[2] }}</span>
+            <span class="S2">{{ timerDigits[3] }}</span>
+          </div>
 
-        <div
-          v-if="isBigNumber && settings.show.timer && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
-          class="text-center text-time font-digital-clock" :style="{ color: timerText }" :class="{
-            'animate-pulse-fast': !update.isReset && update.isCountingUp && settings.pulseAtZero
-          }">
-          <span class="S2">{{ timer }}</span>
+          <div
+            v-if="isBigNumber && settings.show.timer && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
+            class="text-center text-time font-digital-clock" :style="{ color: timerText }" :class="{
+              'animate-pulse-fast': !update.isReset && update.isCountingUp && settings.pulseAtZero
+            }">
+            <span class="S2">{{ timer }}</span>
+          </div>
         </div>
+        <progress-bar
+          v-if="settings.show.progress && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
+          :is-expiring="update.isExpiring" :is-counting-up="update.isCountingUp" :is-reset="update.isReset"
+          :value="progressBarPercent" />
+        <clock v-if="showClock" :clock-color="settings.colors.clock" :text-color="settings.colors.clockText"
+          :is-big="settings.contentAtReset === ContentAtReset.Time && update.isReset"
+          :seconds-on-clock="settings.show.secondsOnClock" :use12-hour-clock="settings.use12HourClock" />
       </div>
-      <progress-bar
-        v-if="settings.show.progress && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
-        :is-expiring="update.isExpiring" :is-counting-up="update.isCountingUp" :is-reset="update.isReset"
-        :value="progressBarPercent" />
-      <clock v-if="showClock" :clock-color="settings.colors.clock" :text-color="settings.colors.clockText"
-        :is-big="settings.contentAtReset === ContentAtReset.Time && update.isReset"
-        :seconds-on-clock="settings.show.secondsOnClock" :use12-hour-clock="settings.use12HourClock" />
-    </div>
     </transition>
   </div>
 </template>
@@ -63,7 +67,6 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from "vue";
 import { ipcRenderer } from 'electron'
-//import { Howl } from 'howler'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import {
@@ -141,17 +144,15 @@ const isBigNumber = computed(() => {
 const showClock = computed(() => {
   if (update.value.isReset) {
     if (settings.value.contentAtReset === ContentAtReset.Time) return true;
-    if (settings.value.contentAtReset !== ContentAtReset.Empty && settings.value.show.clock) return true;
+    if (settings.value.contentAtReset !== ContentAtReset.Empty && settings.value.show.clocktwo) return true;
   }
-  return settings.value.show.clock;
+  return settings.value.show.clocktwo;
 });
 
 const progressBarPercent = computed(() => {
   if (update.value.secondsSetOnCurrentTimer === 0 || update.value.currentSeconds === 0) return 100;
   if (update.value.isCountingUp) return 100;
-  let i = ((update.value.secondsSetOnCurrentTimer - update.value.currentSeconds) * 100 / update.value.secondsSetOnCurrentTimer);
-  console.log(update.value);
-  return i;
+  return ((update.value.secondsSetOnCurrentTimer - update.value.currentSeconds) * 100 / update.value.secondsSetOnCurrentTimer);
 });
 
 const timerText = computed(() => {

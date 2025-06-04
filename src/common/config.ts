@@ -34,7 +34,7 @@ export const DEFAULT_CONTENT_AT_RESET: ContentAtReset = ContentAtReset.Full;
 export const DEFAULT_TIMER_ALWAYS_ON_TOP = false;
 export const DEFAULT_SET_WINDOW_ALWAYS_ON_TOP = false;
 export const DEFAULT_YELLOW_AT_OPTION = 'minutes';
-export const DEFAULT_YELLOW_AT_MINUTES = 2;
+export const DEFAULT_YELLOW_AT_MINUTES = 1;
 export const DEFAULT_YELLOW_AT_PERCENT = 10;
 
 export const DEFAULT_SET_TIME_LIVE = false;

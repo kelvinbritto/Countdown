@@ -40,7 +40,8 @@
       <p class="text-2xl">Timer UI</p>
       <check-box id="showTimer" v-model="settings.timers[0].windows[0].show.timer">Timer</check-box>
       <check-box id="showProgress" v-model="settings.timers[0].windows[0].show.progress">Progress</check-box>
-      <check-box id="showClock" v-model="settings.timers[0].windows[0].show.clock">Clock</check-box>
+      <check-box id="showClock" v-model="settings.timers[0].windows[0].show.clock">Display clock when idle</check-box>
+      <check-box id="showClockTwo" v-model="settings.timers[0].windows[0].show.clocktwo">Show clock during countdown</check-box>
       <check-box id="showSecondsOnClock" v-model="settings.timers[0].windows[0].show.secondsOnClock">Seconds on clock</check-box>
       <check-box id="messageBoxFixedHeight" v-model="settings.timers[0].windows[0].messageBoxFixedHeight">Message box fixed height</check-box>
       <check-box id="use12HourClock" v-model="settings.timers[0].windows[0].use12HourClock">12-Hour Clock</check-box>

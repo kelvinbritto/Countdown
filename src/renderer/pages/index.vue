@@ -13,7 +13,7 @@
       </card>
     </div>
     <div v-if="tab === 'main'" class="countdown-tab p-1">
-      <div class="flex gap-2">
+      <div class="flex gap-2 max-h-[340px]">
         <card class="clock-setup justify-center">
           <div class="uppercase text-white">Set</div>
           <time-input @update:modelValue="timerControl.set($event);" :modelValue="update.setSeconds" color="white" />
@@ -35,7 +35,7 @@
             @click="timerControl.toggle">
             {{ update.isRunning ? "Pause" : "Resume" }}
           </s-button>
-          <s-button class="text-4xl mb-2 font-mono uppercase" type="danger" @click="timerControl.reset">
+          <s-button class="text-4xl mb-2 font-mono uppercase" type="danger" @click="onResetClick">
             Reset
           </s-button>
           <div class="flex gap-2 justify-center">
@@ -68,16 +68,32 @@
             </jog>
           </div>
         </card>
-        <card class="flex-1">
-          <div class="uppercase text-white">Message</div>
-          <div class="flex gap-2">
-            <input-with-button type="text" @input="value => message = value" :model-value="message"
-              @click="sendMessage">Send</input-with-button>
-            <button @click="deleteMessage"
-              class="mt-1 relative inline-flex items-center space-x-2 px-2 py-1 border border-red-600 text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-500 focus:outline-none focus:ring-1 focus:ring-red-400 focus:border-red-500">
-              <trash-icon class="w-5 h-5 inline-flex" />
+
+        <card class="overflow-y-scroll rounded p-2">
+          <div class="flex items-center gap-1 mb-1">
+            <span class="uppercase text-white">Message</span>
+          </div>
+
+          <!-- Campo de entrada -->
+          <div class="flex gap-2 mb-2">
+            <input-with-button :is-live="isLive" type="text" @input="value => message = value" :model-value="message"
+              @click="sendMessage">
+              Send
+            </input-with-button>
+          </div>
+
+          <div class="flex gap-2 mb-2">
+            <button @click="addOrMoveMessageToFront(message)"
+              class="flex-1 p-1 bg-green-600 text-white rounded hover:bg-green-500 text-xs">
+              Add Preset
+            </button>
+            <button @click="deleteMessage" class="flex-1 p-1 bg-red-600 text-white rounded hover:bg-red-500 text-xs">
+              Clear
             </button>
           </div>
+
+          <message-preset v-for="(msg, index) in messages" :key="index" :messageInput="msg" @select="onSelectPreset"
+            @delete="onDeletePreset" />
         </card>
       </div>
       <card class="presets inline-flex gap-2 overflow-x-auto">
@@ -94,7 +110,7 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import { ipcRenderer } from 'electron'
 import Card from '../components/Card.vue'
 import SButton from '../components/SButton.vue'
@@ -102,7 +118,7 @@ import TimeInput from '../components/TimeInput.vue'
 import SettingsTab from '../components/SettingsTab.vue'
 import WindowsTab from "../components/WindowsTab.vue";
 import Jog from "../components/Jog.vue";
-import { PlayPauseIcon, PlusIcon, MinusIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import { PlayPauseIcon, PlusIcon, MinusIcon, TrashIcon, PaperAirplaneIcon } from '@heroicons/vue/24/outline';
 import Navigation from "../components/Navigation.vue";
 import { shell } from "electron";
 import dayjs from 'dayjs'
@@ -114,6 +130,8 @@ import { TimerControl } from "../TimerControl";
 import Display = Electron.Display;
 import InputWithButton from "../components/InputWithButton.vue";
 import { CountdownSettings, DEFAULT_STORE } from "../../common/config";
+import { MessageUpdate } from "../../common/TimerInterfaces";
+import MessagePreset from "../components/MessagePreset.vue"
 // import {Howl} from "howler";
 /*
 import { Howl } from "howler";
@@ -132,6 +150,19 @@ defineOptions({
 export interface Props {
   tab: string
 }
+
+let messageUpdate = ref<MessageUpdate>({
+  message: null,
+});
+
+const isLive = computed(() => {
+
+  console.log(messageUpdate.value);
+
+  if (!messageUpdate.value.message) {
+    return false
+  }
+});
 
 const props = defineProps<Props>();
 
@@ -155,15 +186,46 @@ let update = ref<TimerEngineUpdate>({
 });
 let message = ref('');
 let lastMessage = ref('');
+const messages = ref<string[]>([]);
+
+messages.value.unshift("Please, Wrap Up!");
+messages.value.unshift("Your time is Over");
 
 function sendMessage() {
   timerControl.sendMessage(message.value);
-  lastMessage.value = message.value;
+}
+
+function onResetClick(): void {
+  timerControl.reset();
+  timerControl.sendMessage('');
+}
+
+function onSelectPreset(presetMessage: string): void {
+  message.value = presetMessage;
+}
+
+function onDeletePreset(msgToRemove: string) {
+  const index = messages.value.indexOf(msgToRemove);
+  if (index !== -1) {
+    messages.value.splice(index, 1);
+  }
+}
+
+function addOrMoveMessageToFront(newMessage: string): void {
+  if (typeof newMessage !== 'string' || newMessage == "") return;
+
+  const index = messages.value.indexOf(newMessage);
+
+  if (index !== -1) {
+    messages.value.splice(index, 1);
+  }
+
+  messages.value.unshift(newMessage);
 }
 
 const deleteMessage = () => {
   timerControl.sendMessage('');
-  message.value = '';
+  message.value = "";
 }
 
 onMounted(async () => {
@@ -172,7 +234,12 @@ onMounted(async () => {
 
   ipcRenderer.on('screens-updated', async () => {
     screens.value = await ipcRenderer.invoke('get-screens');
-  })
+  });
+
+  ipcRenderer.on('message', (event, arg) => {
+    console.log(arg);
+    messageUpdate.value = arg;
+  });
 
   ipcRenderer.on('audio:play', async (event, audioFile, mimeType) => {
     const sound = new Howl({

@@ -1,7 +1,8 @@
 <template>
   <form @submit.prevent="$emit('click', $event)" class="mt-1 flex rounded-md shadow-sm">
     <div class="-mr-px relative flex items-stretch flex-grow focus-within:z-10">
-      <input :value="modelValue"
+      <input :disabled="isLive"
+            :value="modelValue"
              @input="$emit('input', ($event.target as HTMLInputElement).value)"
              :type="type"
              max="100"
@@ -22,6 +23,7 @@ defineOptions({
 export interface Props {
   modelValue: number|string
   type: string
+  isLive: boolean
 }
 
 defineProps<Props>();
