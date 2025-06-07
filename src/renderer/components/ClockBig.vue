@@ -32,24 +32,27 @@ const props = defineProps<Props>();
 
 
 let currentTimeTimerId: NodeJS.Timer = null;
-let currentTime = ref(dayjs().format('HH:mm'));
+let currentTime = ref(dayjs().format(getType()));
 let currentDate = ref(dayjs().format('dddd, DD MMMM YYYY'));
 let timeSuffix = ref(dayjs().format('A'));
-function updateTime() {
+
+function getType() {
   if (!props.use12HourClock) {
-    currentTime.value = dayjs().format('HH:mm');
-    currentDate.value = dayjs().format('dddd, DD MMMM YYYY');
+    return "HH:mm";
   }
 
-  if (props.use12HourClock) {
-    currentTime.value = dayjs().format('hh:mm');
-    currentDate.value = dayjs().format('dddd, DD MMMM YYYY');
-  }
+  return "hh:mm";
 }
+
+function updateTime() {
+  currentTime.value = dayjs().format(getType());
+}
+
+
 
 onMounted(() => {
   if (currentTimeTimerId === null) {
-    currentTimeTimerId = setInterval(updateTime, 1000)
+    currentTimeTimerId = setInterval(updateTime, 500)
   }
 })
 </script>

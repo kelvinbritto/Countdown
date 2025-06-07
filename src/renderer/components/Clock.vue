@@ -14,8 +14,8 @@ export interface Props {
 const props = defineProps<Props>();
 
 let currentTimeTimerId: NodeJS.Timer = null;
-let currentTime = ref(dayjs().format(props.clockType));
 let clockTypeFormated = props.clockType;
+let currentTime = ref(dayjs().format(getType(props.clockType)));
 
 function updateTime() {
   if (props.use12HourClock) {
@@ -30,6 +30,12 @@ function updateTime() {
 }
 
 function getType(type) {
+
+  if (!props.use12HourClock) {
+    clockTypeFormated = props.clockType;
+    return props.clockType;
+  }
+
   switch (type) {
     case "dddd, DD.MM.YYYY HH:mm":
       return "dddd, DD.MM.YYYY hh:mm A"
