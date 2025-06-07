@@ -7,7 +7,7 @@
     <transition name="slide-down">
       <div v-if="messageUpdate.message" class="message-box-float" :class="{
         'message-box': true
-      }">
+      }" :style="update.isCountingUp && update.isRunning  ? { color: timerFinishedText } : { color: timerTextMessage }">
         {{ messageUpdate.message }}
       </div>
     </transition>
@@ -26,20 +26,20 @@
           :seconds-on-clock="settings.show.secondsOnClock" :use12-hour-clock="settings.use12HourClock" />
       </div>
       <div v-else class="overlay">
-        <div class="text-left text-white tracking-wide text-5xl font-bold mb-4 ml-10">
+        <!-- <div class="text-left text-white tracking-wide text-5xl font-bold mb-4 ml-10">
           {{ title }}
-        </div>
+        </div> -->
         <div class="timer">
           <div
             v-if="!isBigNumber && settings.show.timer && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
             class="text-center text-time font-digital-clock" :style="{ color: timerText }" :class="{
               'animate-pulse-fast': !update.isReset && update.isCountingUp && settings.pulseAtZero
             }">
-            <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 600 }"> {{ timerDigits[0]
-            }}</span>
-            <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 60 }">{{ timerDigits[1] }}</span>
-            <span :class="{ grayText: !update.isCountingUp }">:</span>
-            <span :class="{ grayText: !update.isCountingUp && update.currentSeconds < 10 }">{{ timerDigits[2] }}</span>
+            <span :class="{ grayText: settings.show.defaultUI && !update.isCountingUp && update.currentSeconds < 600 }"> {{ timerDigits[0]
+              }}</span>
+            <span :class="{ grayText: settings.show.defaultUI && !update.isCountingUp && update.currentSeconds < 60 }">{{ timerDigits[1] }}</span>
+            <span :class="{ grayText: settings.show.defaultUI && !update.isCountingUp }">:</span>
+            <span :class="{ grayText: settings.show.defaultUI && !update.isCountingUp && update.currentSeconds < 10 }">{{ timerDigits[2] }}</span>
             <span class="S2">{{ timerDigits[3] }}</span>
           </div>
 
@@ -55,9 +55,11 @@
           v-if="settings.show.progress && ((settings.contentAtReset === ContentAtReset.Full && update.isReset) || !update.isReset)"
           :is-expiring="update.isExpiring" :is-counting-up="update.isCountingUp" :is-reset="update.isReset"
           :value="progressBarPercent" />
-        <clock v-if="showClock" :clock-color="settings.colors.clock" :text-color="settings.colors.clockText"
+        <clock v-if="showClock" :clock-color="settings.colors.clock" :text-color="settings.colors.clock"
           :is-big="settings.contentAtReset === ContentAtReset.Time && update.isReset"
-          :seconds-on-clock="settings.show.secondsOnClock" :use12-hour-clock="settings.use12HourClock" />
+          :seconds-on-clock="settings.show.secondsOnClock" :use12-hour-clock="settings.use12HourClock"
+          :clock-type="settings.show.clockType"
+          />
       </div>
     </transition>
   </div>
@@ -72,7 +74,7 @@ import duration from 'dayjs/plugin/duration'
 import {
   ContentAtReset,
   DEFAULT_WINDOW_SETTINGS,
-  WindowSettings
+  WindowSettings,
 } from "../../common/config";
 import { MessageUpdate, TimerEngineUpdate } from "../../common/TimerInterfaces";
 import ProgressBar from "../components/ProgressBar.vue";
@@ -156,6 +158,16 @@ const progressBarPercent = computed(() => {
 });
 
 const timerText = computed(() => {
+
+  if(!settings.value.show.defaultUI){
+
+    if(!update.value.isCountingUp || update.value.isReset){
+      return settings.value.colors.clockText;
+    }
+
+    return settings.value.colors.timerFinishedText;
+  }
+
   if (update.value.isExpiring) {
     return "oklch(0.795 0.184 86.047)" //YELLOW
   }
@@ -169,6 +181,15 @@ const timerText = computed(() => {
 const backgroundColor = computed(() => {
   return settings.value.colors.background;
 })
+
+const timerFinishedText = computed(() => {
+  return settings.value.colors.timerFinishedText;
+});
+
+const timerTextMessage = computed(() => {
+  return settings.value.colors.text;
+})
+
 
 const cssVars = computed(() => {
   return {
@@ -193,7 +214,6 @@ onMounted(async () => {
     update.value = arg;
   })
   ipcRenderer.on('message', (event, arg) => {
-    console.log(arg);
     messageUpdate.value = arg;
   })
   ipcRenderer.on('settings:updated', (event, arg) => {
@@ -280,7 +300,6 @@ onMounted(async () => {
 .message-box {
   justify-content: center;
   align-items: center;
-  color: white;
   text-align: center;
   line-height: 1;
 }

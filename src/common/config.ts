@@ -132,6 +132,8 @@ export interface ShowSections {
   clock: boolean
   secondsOnClock: boolean
   hours: boolean
+  defaultUI: boolean
+  clockType: string
 }
 
 export interface WindowBounds {

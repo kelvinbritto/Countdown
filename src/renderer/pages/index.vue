@@ -157,8 +157,6 @@ let messageUpdate = ref<MessageUpdate>({
 
 const isLive = computed(() => {
 
-  console.log(messageUpdate.value);
-
   if (!messageUpdate.value.message) {
     return false
   }
@@ -237,7 +235,6 @@ onMounted(async () => {
   });
 
   ipcRenderer.on('message', (event, arg) => {
-    console.log(arg);
     messageUpdate.value = arg;
   });
 

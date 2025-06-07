@@ -3,8 +3,8 @@
     <card class="inline-block border flex flex-col p-0">
       <p class="text-2xl">Presets (m)</p>
       <draggable item-key="index" v-model="settings.presets" handle=".handle"
-                 class="flex flex-col gap-2 overflow-y-scroll items-center pb-1">
-        <template #item="{element, index}">
+        class="flex flex-col gap-2 overflow-y-scroll items-center pb-1">
+        <template #item="{ element, index }">
           <div :key="index" class="inline-block w-[140px]">
             <edit-preset v-model="settings.presets[index]" @delete="deletePreset(index)"></edit-preset>
           </div>
@@ -17,15 +17,14 @@
       <check-box id="stopTimerAtZero" v-model="settings.timers[0].stopTimerAtZero">Stop timer at 0</check-box>
       <check-box id="showHours" v-model="settings.timers[0].windows[0].show.hours">Show hours</check-box>
       <check-box id="pulseAtZero" v-model="settings.timers[0].windows[0].pulseAtZero">Pulse at zero</check-box>
-      <check-box id="timerAlwaysOnTop" v-model="settings.timers[0].windows[0].alwaysOnTop">Window always on top</check-box>
+      <check-box id="timerAlwaysOnTop" v-model="settings.timers[0].windows[0].alwaysOnTop">Window always on
+        top</check-box>
       <check-box id="setTimeLive" v-model="settings.timers[0].setTimeLive">Set time live</check-box>
       <p class="text-sm mt-2">Yellow Bar at</p>
-      <input-with-button
-        @click="updateYellowOption(0)"
-        @input="updateYellowValue(+$event, 0)"
-        type="number"
+      <input-with-button @click="updateYellowOption(0)" @input="updateYellowValue(+$event, 0)" type="number"
         :model-value="settings.timers[0].yellowAtOption === 'minutes' ? settings.timers[0].yellowAtMinutes : settings.timers[0].yellowAtPercent">
-        {{ settings.timers[0].yellowAtOption === 'minutes' ? 'm' : '%' }} <arrows-right-left-icon class="ml-3 w-4 h-4" />
+        {{ settings.timers[0].yellowAtOption === 'minutes' ? 'm' : '%' }} <arrows-right-left-icon
+          class="ml-3 w-4 h-4" />
       </input-with-button>
       <p class="text-sm mt-2">Content at Reset</p>
       <select v-model="settings.timers[0].windows[0].contentAtReset" class="input p-2 text-black">
@@ -34,21 +33,36 @@
         <option :value="ContentAtReset.Full">Full</option>
       </select>
       <p class="text-sm mt-2">Milliseconds per second</p>
-      <input class="text-black focus:ring-indigo-500 focus:border-indigo-500 block rounded-md w-full text-center px-2 sm:text-sm border-gray-300" type="number" @input="(event) => settings.timers[0].timerDuration = parseInt(event.target.value)" :value="settings.timers[0].timerDuration">
+      <input
+        class="text-black focus:ring-indigo-500 focus:border-indigo-500 block rounded-md w-full text-center px-2 sm:text-sm border-gray-300"
+        type="number" @input="(event) => settings.timers[0].timerDuration = parseInt(event.target.value)"
+        :value="settings.timers[0].timerDuration">
     </card>
     <card class="inline-block border flex flex-col">
       <p class="text-2xl">Timer UI</p>
       <check-box id="showTimer" v-model="settings.timers[0].windows[0].show.timer">Timer</check-box>
       <check-box id="showProgress" v-model="settings.timers[0].windows[0].show.progress">Progress</check-box>
-      <check-box id="showClock" v-model="settings.timers[0].windows[0].show.clock">Display clock when idle</check-box>
-      <check-box id="showClockTwo" v-model="settings.timers[0].windows[0].show.clocktwo">Show clock during countdown</check-box>
-      <check-box id="showSecondsOnClock" v-model="settings.timers[0].windows[0].show.secondsOnClock">Seconds on clock</check-box>
-      <check-box id="messageBoxFixedHeight" v-model="settings.timers[0].windows[0].messageBoxFixedHeight">Message box fixed height</check-box>
+      <check-box id="showClockTwo" v-model="settings.timers[0].windows[0].show.clocktwo">Show clock on
+        countdown</check-box>
+      <check-box id="showSecondsOnClock" v-model="settings.timers[0].windows[0].show.secondsOnClock">Seconds on
+        clock</check-box>
+      <check-box id="messageBoxFixedHeight" v-model="settings.timers[0].windows[0].messageBoxFixedHeight">Message box
+        fixed
+        height</check-box>
       <check-box id="use12HourClock" v-model="settings.timers[0].windows[0].use12HourClock">12-Hour Clock</check-box>
-      <hr class="mt-4 -mx-3 border-t-2"/>
+      <check-box id="showClock" v-model="settings.timers[0].windows[0].show.clock">Display clock when idle</check-box>
+      <check-box id="defaultUI" v-model="settings.timers[0].windows[0].show.defaultUI">Color UI Default</check-box>
+
+      <span>Clock Type</span>
+      <select v-model="settings.timers[0].windows[0].show.clockType" class="input p-2 text-black">
+        <option v-for="clocktype in clockTypes" :value="clocktype">{{ clocktype }}</option>
+      </select>
+
+      <hr class="mt-4 -mx-3 border-t-2" />
       <p class="text-2xl mt-3 mb-1">
         Audio
-        <button @click="settings.timers[0].audioFile = null" v-if="settings.timers[0].audioFile"><trash-icon class="inline-flex w-5 h-5"></trash-icon></button>
+        <button @click="settings.timers[0].audioFile = null" v-if="settings.timers[0].audioFile"><trash-icon
+            class="inline-flex w-5 h-5"></trash-icon></button>
       </p>
       <s-button @click="selectFile">Select file</s-button>
       <div class="max-w-[190px] break-words">Current: {{ settings.timers[0].audioFile }}</div>
@@ -56,10 +70,12 @@
     <card class="inline-block border flex flex-col">
       <div class="flex flex-col" style="min-width: 220px">
         <p class="text-2xl">Colors</p>
-        <color-input :alpha-channel="true" v-model="settings.timers[0].windows[0].colors.background" default-value="#000000ff">
+        <color-input :alpha-channel="true" v-model="settings.timers[0].windows[0].colors.background"
+          default-value="#000000ff">
           Background
         </color-input>
-        <color-input :alpha-channel="true" v-model="settings.timers[0].windows[0].colors.resetBackground" default-value="#000000ff">
+        <color-input :alpha-channel="true" v-model="settings.timers[0].windows[0].colors.resetBackground"
+          default-value="#000000ff">
           Background at reset
         </color-input>
         <color-input v-model="settings.timers[0].windows[0].colors.text" default-value="#ffffff">
@@ -68,13 +84,13 @@
         <color-input v-model="settings.timers[0].windows[0].colors.timerFinishedText" default-value="#ff0000">
           Text on timer finished
         </color-input>
+        <color-input v-model="settings.timers[0].windows[0].colors.clockText" default-value="#ffffff">
+          Countdown
+        </color-input>
         <color-input v-model="settings.timers[0].windows[0].colors.clock" default-value="#ffffff">
           Clock
         </color-input>
-        <color-input v-model="settings.timers[0].windows[0].colors.clockText" default-value="#ffffff">
-          Clock Text
-        </color-input>
-        <hr class="mt-4 -mx-3 border-t-2"/>
+        <hr class="mt-4 -mx-3 border-t-2" />
         <p class="text-2xl mt-3">Close action</p>
         <select v-model="settings.closeAction" class="input p-2 text-black">
           <option v-for="action in CloseAction" :value="action">{{ getCloseActionLabel(action) }}</option>
@@ -86,9 +102,9 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineComponent, onBeforeMount, ref, watch} from "vue";
-import {ArrowsRightLeftIcon, TrashIcon} from "@heroicons/vue/20/solid";
-import {ipcRenderer} from 'electron'
+import { computed, defineComponent, onBeforeMount, ref, watch } from "vue";
+import { ArrowsRightLeftIcon, TrashIcon } from "@heroicons/vue/20/solid";
+import { ipcRenderer } from 'electron'
 import draggable from 'vuedraggable'
 import Card from './Card.vue'
 import ColorInput from './ColorInput.vue'
@@ -103,8 +119,8 @@ import {
 import CheckBox from "./CheckBox.vue";
 import EditPreset from "./EditPreset.vue";
 import Display = Electron.Display;
-import {CloseAction} from "../../common/config";
-import {watchIgnorable, useDebounceFn} from "@vueuse/core";
+import { CloseAction } from "../../common/config";
+import { watchIgnorable, useDebounceFn } from "@vueuse/core";
 
 defineOptions({
   name: 'SettingsTab',
@@ -135,7 +151,7 @@ let settings = ref<CountdownSettings>({
 
 const { stop, ignoreUpdates } = watchIgnorable(settings, () => {
   save();
-}, {deep: true});
+}, { deep: true });
 
 function updateYellowOption(timerId = 0) {
   if (settings.value.timers[timerId].yellowAtOption === 'minutes') {
@@ -180,6 +196,14 @@ function getCloseActionLabel(closeAction: CloseAction): string {
 
   return labels[closeAction]
 }
+
+const clockTypes = [
+  "dddd, DD.MM.YYYY HH:mm",
+  "DD.MM.YYYY HH:mm",
+  "HH:mm",
+  "DD.MM.YYYY"
+]
+
 
 const selectFile = async () => {
   const file = await ipcRenderer.invoke('audio:select-file')

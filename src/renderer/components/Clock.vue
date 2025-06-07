@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import dayjs from "dayjs";
-import {onMounted, ref} from "vue";
+import { onMounted, ref } from "vue";
 
 export interface Props {
   isBig: boolean
@@ -8,20 +8,47 @@ export interface Props {
   textColor: string
   secondsOnClock: boolean
   use12HourClock: boolean
+  clockType: string
 }
 
 const props = defineProps<Props>();
 
 let currentTimeTimerId: NodeJS.Timer = null;
-let currentTime = ref(dayjs().format('dddd, DD.MM.YYYY HH:mm'));
+let currentTime = ref(dayjs().format(props.clockType));
+let clockTypeFormated = props.clockType;
+
 function updateTime() {
-  if (!props.use12HourClock) {
-    currentTime.value = dayjs().format('dddd, DD.MM.YYYY HH:mm');
+  if (props.use12HourClock) {
+    clockTypeFormated = getType(props.clockType);
   }
-  if(props.use12HourClock) {
-    currentTime.value = dayjs().format('dddd, DD.MM.YYYY hh:mm');
+
+  if (!props.use12HourClock) {
+    clockTypeFormated = props.clockType;
+  }
+
+  currentTime.value = ref(dayjs().format(clockTypeFormated));
+}
+
+function getType(type) {
+  switch (type) {
+    case "dddd, DD.MM.YYYY HH:mm":
+      return "dddd, DD.MM.YYYY hh:mm A"
+
+    case "DD.MM.YYYY HH:mm":
+      return "DD.MM.YYYY hh:mm A"
+
+    case "HH:mm":
+      return "hh:mm A"
+
+    case "DD.MM.YYYY":
+      return "DD.MM.YYYY"
+
+    default:
+      return "dddd, DD.MM.YYYY HH:mm";
   }
 }
+
+
 
 onMounted(() => {
   if (currentTimeTimerId === null) {
@@ -31,19 +58,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    class="text-right text-clock"
-    :class="{
-        'text-clock': !isBig,
-        'text-clock-on-reset': isBig
-      }"
-  >
-    <span class="ml-5" :style="{color: textColor}">{{ currentTime }}</span>
+  <div class="text-right text-clock" :class="{
+    'text-clock': !isBig,
+    'text-clock-on-reset': isBig
+  }">
+    <span class="ml-5" :style="{ color: textColor }">{{ currentTime }}</span>
   </div>
 </template>
 
 <style scoped>
-
 .clock-icon {
   height: min(20vh, 15vw);
   width: min(20vh, 15vw);
