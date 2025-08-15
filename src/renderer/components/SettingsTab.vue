@@ -1,105 +1,127 @@
 <template>
-  <div v-if="settings.timers[0]" class="flex flex-1 gap-2 p-1 min-h-0 text-white">
-    <card class="inline-block border flex flex-col p-0">
-      <p class="text-2xl">Presets (m)</p>
-      <draggable item-key="index" v-model="settings.presets" handle=".handle"
-        class="flex flex-col gap-2 overflow-y-scroll items-center pb-1">
+  <div
+    v-if="settings.timers[0]"
+    class="flex flex-1 gap-2 p-1 min-h-0 text-white items-stretch max-h-[700px] overflow-hidden"
+  >
+    <!-- Presets -->
+    <card class="inline-block border flex flex-col p-3 h-full overflow-y-auto w-[240px]">
+      <p class="text-2xl mb-2">Presets (m)</p>
+      <draggable
+        item-key="index"
+        v-model="settings.presets"
+        handle=".handle"
+        class="flex flex-col gap-2 overflow-y-scroll items-center pb-1"
+      >
         <template #item="{ element, index }">
           <div :key="index" class="inline-block w-[140px]">
-            <edit-preset v-model="settings.presets[index]" @delete="deletePreset(index)"></edit-preset>
+            <edit-preset
+              v-model="settings.presets[index]"
+              @delete="deletePreset(index)"
+            ></edit-preset>
           </div>
         </template>
       </draggable>
-      <s-button tiny class="m-3" type="info" @click="addPreset">Add</s-button>
+      <s-button tiny class="mt-3" type="info" @click="addPreset">Add</s-button>
     </card>
-    <card class="inline-block border flex flex-col">
-      <p class="text-2xl">Timer</p>
-      <check-box id="stopTimerAtZero" v-model="settings.timers[0].stopTimerAtZero">Stop timer at 0</check-box>
-      <check-box id="showHours" v-model="settings.timers[0].windows[0].show.hours">Show hours</check-box>
-      <check-box id="pulseAtZero" v-model="settings.timers[0].windows[0].pulseAtZero">Pulse at zero</check-box>
-      <check-box id="timerAlwaysOnTop" v-model="settings.timers[0].windows[0].alwaysOnTop">Window always on
-        top</check-box>
-      <check-box id="setTimeLive" v-model="settings.timers[0].setTimeLive">Set time live</check-box>
-      <p class="text-sm mt-2">Yellow Bar at</p>
-      <input-with-button @click="updateYellowOption(0)" @input="updateYellowValue(+$event, 0)" type="number"
-        :model-value="settings.timers[0].yellowAtOption === 'minutes' ? settings.timers[0].yellowAtMinutes : settings.timers[0].yellowAtPercent">
-        {{ settings.timers[0].yellowAtOption === 'minutes' ? 'm' : '%' }} <arrows-right-left-icon
-          class="ml-3 w-4 h-4" />
+
+    <!-- Timer Settings -->
+    <card class="inline-block border flex flex-col p-3 h-full overflow-y-auto w-[280px]">
+      <p class="text-2xl mb-2">Timer</p>
+      <div class="flex flex-col gap-2">
+        <check-box id="stopTimerAtZero" v-model="settings.timers[0].stopTimerAtZero">Stop timer at 0</check-box>
+        <check-box id="showHours" v-model="settings.timers[0].windows[0].show.hours">Show hours</check-box>
+        <check-box id="pulseAtZero" v-model="settings.timers[0].windows[0].pulseAtZero">Pulse at zero</check-box>
+        <check-box id="timerAlwaysOnTop" v-model="settings.timers[0].windows[0].alwaysOnTop">Window always on top</check-box>
+        <check-box id="setTimeLive" v-model="settings.timers[0].setTimeLive">Set time live</check-box>
+      </div>
+
+      <p class="text-sm mt-3">Yellow Bar at</p>
+      <input-with-button
+        @click="updateYellowOption(0)"
+        @input="updateYellowValue(+$event, 0)"
+        type="number"
+        :model-value="settings.timers[0].yellowAtOption === 'minutes'
+          ? settings.timers[0].yellowAtMinutes
+          : settings.timers[0].yellowAtPercent"
+      >
+        {{ settings.timers[0].yellowAtOption === 'minutes' ? 'm' : '%' }}
+        <arrows-right-left-icon class="ml-3 w-4 h-4" />
       </input-with-button>
-      <p class="text-sm mt-2">Content at Reset</p>
+
+      <p class="text-sm mt-3">Content at Reset</p>
       <select v-model="settings.timers[0].windows[0].contentAtReset" class="input p-2 text-black">
         <option :value="ContentAtReset.Empty">Empty</option>
-        <option :value="ContentAtReset.Time">Time</option>
         <option :value="ContentAtReset.Full">Full</option>
       </select>
-      <p class="text-sm mt-2">Milliseconds per second</p>
+
+      <p class="text-sm mt-3">Milliseconds per second</p>
       <input
         class="text-black focus:ring-indigo-500 focus:border-indigo-500 block rounded-md w-full text-center px-2 sm:text-sm border-gray-300"
-        type="number" @input="(event) => settings.timers[0].timerDuration = parseInt(event.target.value)"
-        :value="settings.timers[0].timerDuration">
-    </card>
-    <card class="inline-block border flex flex-col">
-      <p class="text-2xl">Timer UI</p>
-      <check-box id="showTimer" v-model="settings.timers[0].windows[0].show.timer">Timer</check-box>
-      <check-box id="showProgress" v-model="settings.timers[0].windows[0].show.progress">Progress</check-box>
-      <check-box id="showClockTwo" v-model="settings.timers[0].windows[0].show.clocktwo">Show clock on
-        countdown</check-box>
-      <check-box id="showSecondsOnClock" v-model="settings.timers[0].windows[0].show.secondsOnClock">Seconds on
-        clock</check-box>
-      <check-box id="messageBoxFixedHeight" v-model="settings.timers[0].windows[0].messageBoxFixedHeight">Message box
-        fixed
-        height</check-box>
-      <check-box id="use12HourClock" v-model="settings.timers[0].windows[0].use12HourClock">12-Hour Clock</check-box>
-      <check-box id="showClock" v-model="settings.timers[0].windows[0].show.clock">Display clock when idle</check-box>
-      <check-box id="defaultUI" v-model="settings.timers[0].windows[0].show.defaultUI">Color UI Default</check-box>
+        type="number"
+        @input="(event) => settings.timers[0].timerDuration = parseInt(event.target.value)"
+        :value="settings.timers[0].timerDuration"
+      />
 
-      <span>Clock Type</span>
+      <!-- Slider -->
+      <div class="mt-4">
+        <div class="flex flex-col">
+          <input
+            type="range"
+            :min="0"
+            :max="options.length - 1"
+            :step="1"
+            v-model="index"
+            class="w-full accent-purple-600"
+          />
+          <label class="mt-1 text-sm text-center">
+            Timer Speed: {{ options[index] }} ({{ selectedMilliseconds }} ms)
+          </label>
+        </div>
+      </div>
+    </card>
+
+    <!-- Timer UI -->
+    <card class="inline-block border flex flex-col p-3 h-full overflow-y-auto w-[280px]">
+      <p class="text-2xl mb-2">Timer UI</p>
+      <div class="flex flex-col gap-2">
+        <check-box id="showTimer" v-model="settings.timers[0].windows[0].show.timer">Timer</check-box>
+        <check-box id="showProgress" v-model="settings.timers[0].windows[0].show.progress">Progress</check-box>
+        <check-box id="showClockTwo" v-model="settings.timers[0].windows[0].show.clocktwo">Show clock on countdown</check-box>
+        <check-box id="messageBoxFixedHeight" v-model="settings.timers[0].windows[0].messageBoxFixedHeight">Message box fixed height</check-box>
+        <check-box id="use12HourClock" v-model="settings.timers[0].windows[0].use12HourClock">12-Hour Clock</check-box>
+        <check-box id="showClock" v-model="settings.timers[0].windows[0].show.clock">Display clock when idle</check-box>
+        <check-box id="showSecondsOnClock" v-model="settings.timers[0].windows[0].show.secondsOnClock">Seconds on idle clock</check-box>
+        <check-box id="defaultUI" v-model="settings.timers[0].windows[0].show.defaultUI">Color UI Default</check-box>
+      </div>
+
+      <span class="mt-3">Clock Type</span>
       <select v-model="settings.timers[0].windows[0].show.clockType" class="input p-2 text-black">
         <option v-for="clocktype in clockTypes" :value="clocktype">{{ clocktype }}</option>
       </select>
+    </card>
+
+    <!-- Colors -->
+    <card class="inline-block border flex flex-col p-3 h-full overflow-y-auto w-[260px]">
+      <p class="text-2xl mb-2">Colors</p>
+      <div class="flex flex-col gap-2">
+        <color-input :alpha-channel="true" v-model="settings.timers[0].windows[0].colors.background" default-value="#000000ff">Background</color-input>
+        <color-input :alpha-channel="true" v-model="settings.timers[0].windows[0].colors.resetBackground" default-value="#000000ff">Background at reset</color-input>
+        <color-input v-model="settings.timers[0].windows[0].colors.text" default-value="#ffffff">Text</color-input>
+        <color-input v-model="settings.timers[0].windows[0].colors.timerFinishedText" default-value="#ff0000">Text on timer finished</color-input>
+        <color-input v-model="settings.timers[0].windows[0].colors.clockText" default-value="#ffffff">Countdown</color-input>
+        <color-input v-model="settings.timers[0].windows[0].colors.clock" default-value="#ffffff">Clock</color-input>
+      </div>
 
       <hr class="mt-4 -mx-3 border-t-2" />
-      <p class="text-2xl mt-3 mb-1">
-        Audio
-        <button @click="settings.timers[0].audioFile = null" v-if="settings.timers[0].audioFile"><trash-icon
-            class="inline-flex w-5 h-5"></trash-icon></button>
-      </p>
-      <s-button @click="selectFile">Select file</s-button>
-      <div class="max-w-[190px] break-words">Current: {{ settings.timers[0].audioFile }}</div>
-    </card>
-    <card class="inline-block border flex flex-col">
-      <div class="flex flex-col" style="min-width: 220px">
-        <p class="text-2xl">Colors</p>
-        <color-input :alpha-channel="true" v-model="settings.timers[0].windows[0].colors.background"
-          default-value="#000000ff">
-          Background
-        </color-input>
-        <color-input :alpha-channel="true" v-model="settings.timers[0].windows[0].colors.resetBackground"
-          default-value="#000000ff">
-          Background at reset
-        </color-input>
-        <color-input v-model="settings.timers[0].windows[0].colors.text" default-value="#ffffff">
-          Text
-        </color-input>
-        <color-input v-model="settings.timers[0].windows[0].colors.timerFinishedText" default-value="#ff0000">
-          Text on timer finished
-        </color-input>
-        <color-input v-model="settings.timers[0].windows[0].colors.clockText" default-value="#ffffff">
-          Countdown
-        </color-input>
-        <color-input v-model="settings.timers[0].windows[0].colors.clock" default-value="#ffffff">
-          Clock
-        </color-input>
-        <hr class="mt-4 -mx-3 border-t-2" />
-        <p class="text-2xl mt-3">Close action</p>
-        <select v-model="settings.closeAction" class="input p-2 text-black">
-          <option v-for="action in CloseAction" :value="action">{{ getCloseActionLabel(action) }}</option>
-        </select>
-        <check-box id="startHidden" v-model="settings.startHidden">Start hidden</check-box>
-      </div>
+      <p class="text-2xl mt-3">Close action</p>
+      <select v-model="settings.closeAction" class="input p-2 text-black">
+        <option v-for="action in CloseAction" :value="action">{{ getCloseActionLabel(action) }}</option>
+      </select>
+      <check-box id="startHidden" v-model="settings.startHidden" class="mt-2">Start hidden</check-box>
     </card>
   </div>
 </template>
+
 
 <script lang="ts" setup>
 import { computed, defineComponent, onBeforeMount, ref, watch } from "vue";
@@ -135,6 +157,16 @@ const props = withDefaults(defineProps<Props>(), {
   screens: () => [],
   selectedScreen: null,
 })
+
+const options = ['1.0x', '1.1x', '1.2x', '1.5x'];
+const index = ref(0);
+
+const selectedMultiplier = computed(() => parseFloat(options[index.value].replace('x', '')));
+const selectedMilliseconds = computed(() => Math.round(1000 + (1 - selectedMultiplier.value) * 1000));
+
+watch(selectedMilliseconds, (newVal) => {
+  settings.value.timers[0].timerDuration = newVal;
+});
 
 const emit = defineEmits<{
   'settings-updated': [],

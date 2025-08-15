@@ -69,7 +69,7 @@
           </div>
         </card>
 
-        <card class="overflow-y-scroll rounded p-2">
+        <card class="menssage-input overflow-y-scroll rounded p-2">
           <div class="flex items-center gap-1 mb-1">
             <span class="uppercase text-white">Message</span>
           </div>
@@ -285,25 +285,67 @@ function save() {
 
 <style scoped>
 .main-container {
-  height: 100%;
-  gap: 10px;
+  height: 100vh;
+  /* Garante que ocupe a altura total da viewport */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
   padding: 0 10px 10px 10px;
+  gap: 10px;
 }
 
 .countdown-tab {
   @apply flex flex-col gap-2;
+  flex: 1 1 auto;
+  /* Ocupa o espaço restante */
+  overflow: hidden;
+  /* Evita estouro visual */
+}
+
+.flex.gap-2.max-h-\[340px\] {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .clock-setup {
-  @apply flex flex-col min-w-fit
+  @apply flex flex-col min-w-fit;
+  flex: 1 1 33%;
+  min-width: 400px;
+  max-width: 450px;
+  min-height: 0;
 }
 
 .control-buttons {
   @apply flex flex-col;
-  min-width: 250px;
+  min-width: 200px;
+  max-width: 350px;
+  flex: 1 1 33%;
+  min-height: 0;
 }
 
-.presets {}
+.menssage-input {
+  @apply flex flex-col;
+  min-width: 200px;
+  max-width: 450px;
+  flex: 1 1 33%;
+  min-height: 0;
+}
+
+
+.card.overflow-y-scroll.rounded.p-2 {
+  flex: 1 1 34%;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+
+.presets {
+  @apply inline-flex gap-2 overflow-x-auto;
+  max-width: 1260px;
+}
+
 
 .top-menu {
   height: 50px;

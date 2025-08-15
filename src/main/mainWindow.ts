@@ -6,10 +6,12 @@ import {APP_VERSION} from "../version.ts";
 export default function createMainWindow (options: BrowserWindowConstructorOptions = {}) {
   options = {
     ...{
-      height: 590,
-      width: 920,
-      minWidth: 920,
-      minHeight: 590,
+      minWidth: 1000,
+      minHeight: 600,
+      width: 1000,
+      height: 600,
+      maxHeight: 600,
+      maxWidth: 1300,
       title: `Countdown Settings - Countdown (kbrito_version) v${APP_VERSION}`
     },
     ...options,

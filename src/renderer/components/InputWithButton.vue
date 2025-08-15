@@ -1,6 +1,6 @@
 <template>
-  <form @submit.prevent="$emit('click', $event)" class="mt-1 flex rounded-md shadow-sm">
-    <div class="-mr-px relative flex items-stretch flex-grow focus-within:z-10">
+  <form @submit.prevent="$emit('click', $event)" class="w-full mt-1 flex rounded-md shadow-sm">
+    <div class="relative flex flex-grow items-stretch focus-within:z-10">
       <input :disabled="isLive"
             :value="modelValue"
              @input="$emit('input', ($event.target as HTMLInputElement).value)"

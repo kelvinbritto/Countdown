@@ -6,6 +6,7 @@
   }">
     <span class="ml-5" :style="{ color: clockColor }">{{ currentTime }}</span>
     <span v-if="use12HourClock" :style="{ color: clockColor, fontSize: '55px' }">{{ timeSuffix }}</span>
+
   </div>
 
   <div class="text-center text-date">
@@ -37,11 +38,18 @@ let currentDate = ref(dayjs().format('dddd, DD MMMM YYYY'));
 let timeSuffix = ref(dayjs().format('A'));
 
 function getType() {
-  if (!props.use12HourClock) {
-    return "HH:mm";
+  if (props.secondsOnClock) {
+    if (!props.use12HourClock) {
+      return "HH:mm:ss";
+    } else {
+      return "hh:mm:ss";
+    }
+  } else {
+    if (!props.use12HourClock) {
+      return "HH:mm";
+    }
+    return "hh:mm";
   }
-
-  return "hh:mm";
 }
 
 function updateTime() {
@@ -71,6 +79,7 @@ onMounted(() => {
 .text-clock {
   font-size: min(40vh, 30vw);
   font-weight: lighter;
+  font-variant-numeric: tabular-nums;
 }
 
 .text-date {
